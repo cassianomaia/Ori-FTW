@@ -14,10 +14,10 @@
 // struct que define registros de 62 bytes para um arquivo de catalogo de violinos
 typedef struct {
 	
-	int code[4];
+	int code;
 	char desc[50];
-	int ano[4];
-	float valor[4];		// 4 + 50 + 4 + 4 = 62 bytes
+	int ano;
+	float valor;		// 4 + 4 + 50 + 4 = 62 
 	
 } reg;
 
