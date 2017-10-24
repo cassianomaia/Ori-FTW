@@ -14,7 +14,7 @@
 // struct que define registros de 62 bytes para um arquivo de catalogo de violinos
 typedef struct {
 	
-	int cod[4];
+	int code[4];
 	char desc[50];
 	int ano[4];
 	float valor[4];		// 4 + 50 + 4 + 4 = 62 bytes
@@ -30,17 +30,16 @@ typedef struct {
 	
 } bloco; 
 
-
-// operações dos registros
-int insereReg(reg, char*);			//parametros: reg e filepath
-int removeReg(int*, char*);			//codigo (key) e filepath
-void readReg(reg*);
-void writeReg(reg);
-int procuraReg(reg*, int*, char*)	//reg, key e filepath
-
 //operação do bloco
 bloco* criaBloco();
 
+// operações dos registros
+//int insereReg(reg, char*);			//parametros: reg e filepath
+//int removeReg(int*, char*);			//codigo (key) e filepath
+//void leReg(reg*);
+//void escreveReg(reg);
+//int procuraReg(reg*, int*, char*);	//reg, key e filepath
+
 //operações do arquivo
-int criaFile(char*);
-int compactaFile(char*);
+bool criaArquivo();
+//bool compactaArquivo();
