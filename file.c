@@ -3,7 +3,7 @@
 bloco* criaBloco(){
 	bloco* novo = (bloco*)malloc(sizeof(bloco));
 	memset(novo,0,tamBloco);
-	novo->header = "11";
+	 strncpy(novo->header, "--", 2);
 	return novo;
 }
 
@@ -15,15 +15,16 @@ void escreveReg(reg)
 int procuraReg(reg*, int*, char*)
 */
 
-bool criaArquivo(){
-	FILE* arquivo = fopen(arquivo.txt, wb);
+int criaArquivo(){
+	FILE* arquivo = fopen("arquivo.txt", "wb");
 	if(!arquivo){
-		return false;
+		return 0;
 	}else{
 		bloco* bloco= criaBloco();
 		fwrite(bloco, tamBloco, 1, arquivo);
-		free bloco;
+		free(bloco);
 		fclose(arquivo);
+		return 1;
 	}
 }
 //bool compactaArquivo(char*)

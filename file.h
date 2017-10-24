@@ -41,5 +41,5 @@ bloco* criaBloco();
 //int procuraReg(reg*, int*, char*);	//reg, key e filepath
 
 //operações do arquivo
-bool criaArquivo();
+int criaArquivo();
 //bool compactaArquivo();
