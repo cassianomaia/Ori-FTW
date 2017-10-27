@@ -91,7 +91,23 @@ void leReg(reg* regout){		//lê input e coloca em um novo registrador
 	printf("Insira o valor do violino: \n");
 	scanf("%f", &inValor);
 	regout.valor = inValor;
-}	
+}
+
+void escreveReg(reg regout){		//escreve o conteudo de um registrador, NÃO TESTEI
+
+	char temp[50];
+	unsigned int i; 
+
+	printf("Codigo: %d / Descricao: ", &regout.code);
+	memset(temp, 0, sizeof(temp));
+	strncpy(temp, regout.desc, tamDesc);
+	for (i = 0; i < strlen(temp); i++) {
+		putchar(temp[i]);
+	}
+	printf("/ Ano: %d / Valor: %f", &regout.ano, &regout.valor);
+
+}
+
 
 
 
