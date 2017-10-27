@@ -13,7 +13,6 @@
 
 // struct que define registros de 62 bytes para um arquivo de catalogo de violinos
 typedef struct {
-	
 	int code;
 	char desc[50];
 	int ano;

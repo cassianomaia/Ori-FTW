@@ -3,7 +3,7 @@
 bloco* criaBloco(){
 	bloco* novo = (bloco*)malloc(sizeof(bloco));
 	memset(novo,0,tamBloco);
-	 strncpy(novo->header, "--", 2);
+	strncpy(novo->header, "--", 2);
 	return novo;
 }
 
