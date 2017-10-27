@@ -17,21 +17,14 @@ typedef struct {
 	int code;
 	char desc[50];
 	int ano;
-<<<<<<< Updated upstream
-	float valor;		// 4 + 4 + 50 + 4 = 62 
-=======
-	float valor;		// 4 + 50 + 4 + 4 = 62 bytes
->>>>>>> Stashed changes
-	
+	float valor;		// 4 + 4 + 50 + 4 = 62 	
 } reg;
 
 
 // struct que define os blocos do programa, com tamanho fixo de 512 bytes
 typedef struct {
-	
 	char header[2];	//CATITO TA SOBRANDO 14 BYTES
 	reg index[8];	//quantidade de registros de 62 bytes que cabem no bloco
-	
 } bloco; 
 
 //operação do bloco
