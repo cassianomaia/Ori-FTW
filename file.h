@@ -9,6 +9,7 @@
 #define tamDesc 50
 #define tamAno 4
 #define tamValor 4
+#define tamIndex 2
 
 
 // struct que define registros de 62 bytes para um arquivo de catalogo de violinos
@@ -22,20 +23,20 @@ typedef struct {
 
 // struct que define os blocos do programa, com tamanho fixo de 512 bytes
 typedef struct {
-	char header[2];	//CATITO TA SOBRANDO 14 BYTES
+	char header[4];	//CATITO TA SOBRANDO 12 BYTES
 	reg index[8];	//quantidade de registros de 62 bytes que cabem no bloco
 } bloco; 
 
 //operação do bloco
 bloco* criaBloco();
-
+//operações do arquivo
+int criaArquivo();
 // operações dos registros
-//int insereReg(reg, char*);			//parametros: reg e filepath
+int insereReg(reg);			//parametros: registro a ser inserido
 //int removeReg(int*, char*);			//codigo (key) e filepath
 //void leReg(reg*);
 //void escreveReg(reg);
 //int procuraReg(reg*, int*, char*);	//reg, key e filepath
 
-//operações do arquivo
-int criaArquivo();
+
 //bool compactaArquivo();
