@@ -68,6 +68,34 @@ int insereReg(reg newreg){
 		return 1;
 	}
 }
+
+
+void leReg(reg* regout){		//lê input e coloca em um novo registrador
+	int key, inAno; 			//reg->codigo, reg->ano
+	char inDesc[50]; 			//reg->desc
+	float inValor;				//reg->valor
+	
+	
+	printf("Insira o codigo do violino: \n");
+	scanf("%d", &key);
+	regout.code = key;
+	
+	printf("Insira uma breve descricao do violino: \n");
+	fgets(inDesc, sizeof(inDesc), stdin);
+	strncpy(regout.desc, inDesc, tamDesc);
+	
+	printf("Insira o ano do violino: \n");
+	scanf("%d", &inAno);
+	regout.ano = inAno;
+	
+	printf("Insira o valor do violino: \n");
+	scanf("%f", &inValor);
+	regout.valor = inValor;
+}	
+
+
+
+
 /*
 int removeReg(int*, char*)
 void leReg(reg*)
