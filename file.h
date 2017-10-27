@@ -9,7 +9,7 @@
 #define tamDesc 50
 #define tamAno 4
 #define tamValor 4
-#define tamIndex 2
+#define tamIndex 4
 
 
 // struct que define registros de 62 bytes para um arquivo de catalogo de violinos
@@ -17,7 +17,7 @@ typedef struct {
 	int code;
 	char desc[50];
 	int ano;
-	float valor;		// 4 + 4 + 50 + 4 = 62 	
+	int valor;		// 4 + 4 + 50 + 4 = 62 	
 } reg;
 
 

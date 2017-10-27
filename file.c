@@ -21,7 +21,6 @@ int criaArquivo(){
 }
 
 int insereReg(reg newreg){
-	printf("init\n");
 	int offset = 0; //variavel para correr o arquivo
 	int blocon = 0; //para avançar entre os blocos
 	int regn = 0;
@@ -34,10 +33,9 @@ int insereReg(reg newreg){
 	}else{
 		printf("Arquivo encontrado\n");
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
-			printf("inside while\n");
-			if(strcmp(temp->header, "#BLK")){
+			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
 				printf("Bloco validado.\n");
-				while(regn < 6){
+				while(regn < 7){
 					printf("Procurando registro vazio.\n");
 					if(temp->index[regn].code == 0){
 						printf("Escrevendo dados.\n");
@@ -45,18 +43,28 @@ int insereReg(reg newreg){
 						fseek(arquivo, blocon*tamBloco, SEEK_SET);
               			fwrite(temp, tamBloco, 1, arquivo);
               			fclose(arquivo);
+              			free(temp);
+              			fclose(arquivo);
 						return 1;
 					}else{
 						printf("Procurando prox registro.\n");
 						regn++;
 					}
 				}
-				blocon++;	
+				blocon++;
 			}else{
-				printf("Inconsisencia de dados detectada, o arquivo foi corrompido.\n");
+				printf("Inconsistencia de dados detectada, o arquivo foi corrompido.\n");
 				return 0;
 			}
 		}
+		printf("Todos os blocos estão cheios.\n");
+		temp = criaBloco();
+		temp->index[0] = newreg;
+		fseek(arquivo, blocon*tamBloco, SEEK_SET);
+        fwrite(temp, tamBloco, 1, arquivo);
+        free(temp);
+        fclose(arquivo);
+		return 1;
 	}
 }
 /*
