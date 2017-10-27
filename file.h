@@ -17,7 +17,11 @@ typedef struct {
 	int code;
 	char desc[50];
 	int ano;
+<<<<<<< Updated upstream
 	float valor;		// 4 + 4 + 50 + 4 = 62 
+=======
+	float valor;		// 4 + 50 + 4 + 4 = 62 bytes
+>>>>>>> Stashed changes
 	
 } reg;
 
