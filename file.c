@@ -35,7 +35,7 @@ int insereReg(reg newreg){
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
 				printf("Bloco validado.\n");
-				while(regn < 7){
+				while(regn < 6){
 					printf("Procurando registro vazio.\n");
 					if(temp->index[regn].code == 0){
 						printf("Escrevendo dados.\n");
@@ -52,6 +52,7 @@ int insereReg(reg newreg){
 					}
 				}
 				blocon++;
+				regn = 0;
 			}else{
 				printf("Inconsistencia de dados detectada, o arquivo foi corrompido.\n");
 				return 0;
