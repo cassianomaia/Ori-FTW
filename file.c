@@ -36,7 +36,7 @@ int insereReg(reg newreg){
 				printf("Bloco validado.\n");
 				while(regn < 6){
 					printf("Procurando registro vazio.\n");
-					if(temp->index[regn].code == 0){		 //todo here
+					if(temp->index[regn].code == 0 || temp->index[regn].code == -1){
 						printf("Escrevendo dados.\n");
 						temp->index[regn] = newreg;
 						fseek(arquivo, blocon*tamBloco, SEEK_SET);
