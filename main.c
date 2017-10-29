@@ -10,7 +10,7 @@ int main() {
 	printf("%f", f);
 	int index;
 		while (index != (-1)){
-		printf("Selecione sua opcao:\n(1) - Criar um arquivo novo.\n(2) - Adcionar um registro.\n(3) - Sair.\n");
+		printf("Selecione sua opcao:\n(1) - Criar um arquivo novo.\n(2) - Adcionar um registro.\n(3) - Remover um registro.\n(4) - Sair.\n");
 		printf("Sua opção:");
 		scanf("%d", &index);
 		switch(index){
@@ -25,6 +25,9 @@ int main() {
 				insereReg(teste1);
 			break;
 			case 3:
+				removeReg(teste1.code);
+			break;
+			case 4:
 				index = -1;
 			break;
 		}
