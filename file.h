@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define tamReg 64
-#define tamBloco 512
 #define tamCod 4
 #define tamDesc 50
 #define tamAno 4
 #define tamValor 4
-#define tamIndex 4
+#define tamReg 64
+#define tamBloco 512
+#define tamHeader 4
 
 
 // struct que define registros de 62 bytes para um arquivo de catalogo de violinos // 64bytes size

@@ -154,5 +154,5 @@ int removeReg(int rindex){
 
 /*
 int procuraReg(reg*, int*, char*)
-bool compactaArquivo(char*)
+bool compactaArquivo()
 */
