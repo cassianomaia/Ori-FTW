@@ -34,7 +34,7 @@ int insereReg(reg newreg){
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
 				printf("Bloco validado.\n");
-				while(regn < 6){
+				while(regn <= 6){
 					printf("Procurando registro vazio.\n");
 					if(temp->index[regn].code == 0 || temp->index[regn].code == -1){
 						printf("Escrevendo dados.\n");
@@ -91,7 +91,7 @@ void leReg(reg* regout){		//lê input e coloca em um novo registro
 	scanf("%f", &inValor);
 	regout.valor = inValor;
 }
-
+/*
 void escreveReg(reg regout){		//escreve o conteudo de um registro, NÃO TESTEI
 
 	char temp[50];
@@ -121,7 +121,7 @@ int removeReg(int rindex){
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
 				printf("Bloco validado.\n");
-				while(regn < 6){
+				while(regn <= 6){
 					printf("Procurando o registro a ser removido.\n");
 					if(temp->index[regn].code == rindex){
 						printf("Removendo o registro.\n");
@@ -150,9 +150,58 @@ int removeReg(int rindex){
 	}
 }
 
+int procuraReg(){
+	int key;
+	reg result;
+	FILE* arquivo = fopen("arquivo.txt", "rb+");
+	bloco* temp = criaBloco();
+	int blocon = 0; //para avançar entre os blocos
+	int regn = 0;
+
+	do{
+	printf("Digite a chave do registro que deseja encontrar:");
+	scanf("%d", &key);
+	}while(key <= 0);
+
+	if(!arquivo){
+		printf("Arquivo nao encontrado!\n");
+		return 0;
+	}else{
+		printf("Arquivo encontrado\n");
+		while ((fread(temp,tamBloco,1,arquivo)) != 0){
+			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
+				printf("Bloco validado.\n");
+				while(regn <= 6){
+					printf("Procurando o registro.\n");
+					if(temp->index[regn].code == key){
+						result = temp->index[regn];
+						printf("Conteudo do registro:\n"
+							   "Codigo: %d\n"
+							   "Descrição: %s\n"
+							   "Ano: %d\n"
+							   "Valor: %f\n", result.code, result.desc, result.ano, result.valor);
+              			fclose(arquivo);
+              			free(temp);
+              			fclose(arquivo);
+						return 1;
+					}else{
+						regn++;
+					}
+				}
+				blocon++;
+				regn = 0;
+			}else{
+				printf("Inconsistencia de dados detectada, o arquivo foi corrompido.\n");
+				return 0;
+			}
+		}
+		printf("Registro nao encontrado.\n");
+		free(temp);
+        fclose(arquivo);
+        return 0;
+	}
+}
 
 
-/*
-int procuraReg(reg*, int*, char*)
-bool compactaArquivo()
-*/
+//bool compactaArquivo()
+

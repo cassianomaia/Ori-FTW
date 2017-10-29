@@ -3,7 +3,7 @@
 int main() {
 	reg teste;
 	teste.code = 1;
-	strcpy(teste.desc,"Lorem ipsum dolor sit amet, consectetur cras amet.");
+	strcpy(teste.desc,"Lorem ipsum dolor sit amet.");
 	teste.ano = 1998;
 	teste.valor = 1962;
 	int index;
@@ -12,9 +12,11 @@ int main() {
 			       "(1) - Criar um arquivo novo.\n"
 			       "(2) - Adcionar um registro.\n"
 			       "(3) - Remover um registro.\n"
-			       "(4) - Sair.\n");
+			       "(4) - Procurar registro.\n"
+			       "(5) - Sair.\n");
 		printf("Sua opção:");
 		scanf("%d", &index);
+		system("clear");
 		switch(index){
 			case 1:
 				if(criaArquivo()){
@@ -30,6 +32,9 @@ int main() {
 				removeReg(teste.code);
 			break;
 			case 4:
+				procuraReg();
+			break;
+			case 5:
 				index = -1;
 			break;
 		}

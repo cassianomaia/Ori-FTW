@@ -36,7 +36,7 @@ int insereReg(reg);			//parametros: registro a ser inserido
 int removeReg(int);			//codigo
 //void leReg(reg*);
 //void escreveReg(reg);
-//int procuraReg(reg*, int*, char*);	//reg, key e filepath
+int procuraReg();	//reg, key e filepath
 
 
 //bool compactaArquivo();
