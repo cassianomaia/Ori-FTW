@@ -1,16 +1,18 @@
 #include"file.h"
 
 int main() {
-	reg teste1;
-	teste1.code = 1;
-	strcpy(teste1.desc,"Hello world");
-	teste1.ano = 1998;
-	teste1.valor = 1962;
-	float f = sizeof(teste1);
-	printf("%f", f);
+	reg teste;
+	teste.code = 1;
+	strcpy(teste.desc,"Lorem ipsum dolor sit amet, consectetur cras amet.");
+	teste.ano = 1998;
+	teste.valor = 1962;
 	int index;
 		while (index != (-1)){
-		printf("Selecione sua opcao:\n(1) - Criar um arquivo novo.\n(2) - Adcionar um registro.\n(3) - Remover um registro.\n(4) - Sair.\n");
+		printf("\n\nSelecione sua opcao:\n"
+			       "(1) - Criar um arquivo novo.\n"
+			       "(2) - Adcionar um registro.\n"
+			       "(3) - Remover um registro.\n"
+			       "(4) - Sair.\n");
 		printf("Sua opção:");
 		scanf("%d", &index);
 		switch(index){
@@ -22,10 +24,10 @@ int main() {
 				}
 			break;
 			case 2:
-				insereReg(teste1);
+				insereReg(teste);
 			break;
 			case 3:
-				removeReg(teste1.code);
+				removeReg(teste.code);
 			break;
 			case 4:
 				index = -1;
