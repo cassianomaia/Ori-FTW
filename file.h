@@ -29,14 +29,17 @@ typedef struct {
 
 //operação do bloco
 bloco* criaBloco();
+
 //operações do arquivo
 int criaArquivo();
+
 // operações dos registros
 int insereReg(reg);			//parametros: registro a ser inserido
 int removeReg(int);			//codigo
 //void leReg(reg*);
 //void escreveReg(reg);
 int procuraReg();	//reg, key e filepath
+int listaReg(char*); 	//filepath
 
 
 //bool compactaArquivo();
