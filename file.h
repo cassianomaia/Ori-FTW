@@ -33,10 +33,10 @@ bloco* criaBloco();
 int criaArquivo();
 // operações dos registros
 int insereReg(reg);			//parametros: registro a ser inserido
-int removeReg(int);			//codigo
 //void leReg(reg*);
-//void escreveReg(reg);
+void escreveReg(reg);
+int removeReg(int);	//codigo
 int procuraReg();	//reg, key e filepath
+int listaReg();
 
-
-//bool compactaArquivo();
+void compactaArquivo();

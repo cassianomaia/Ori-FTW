@@ -7,13 +7,15 @@ int main() {
 	teste.ano = 1998;
 	teste.valor = 1962;
 	int index;
+	int key;
 		while (index != (-1)){
 		printf("\n\nSelecione sua opcao:\n"
 			       "(1) - Criar um arquivo novo.\n"
 			       "(2) - Adcionar um registro.\n"
 			       "(3) - Remover um registro.\n"
 			       "(4) - Procurar registro.\n"
-			       "(5) - Sair.\n");
+			       "(5) - Listagem de registros.\n"
+			       "(6) - Sair.\n");
 		printf("Sua opção:");
 		scanf("%d", &index);
 		system("clear");
@@ -32,9 +34,16 @@ int main() {
 				removeReg(teste.code);
 			break;
 			case 4:
-				procuraReg();
+				do{
+					printf("Digite a chave do registro que deseja encontrar:");
+					scanf("%d", &key);
+				}while(key <= 0);
+				procuraReg(key);
 			break;
 			case 5:
+				listaReg();
+			break;
+			case 6:
 				index = -1;
 			break;
 		}
