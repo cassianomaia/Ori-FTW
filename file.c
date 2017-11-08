@@ -7,12 +7,21 @@ bloco* criaBloco(){
 	return novo;
 }
 
+blocoinicial* criaBlocoInicial(){
+	blocoinicial* novo = (blocoinicial*)malloc(sizeof(blocoinicial));
+	memset(novo,0,tamBloco);
+	strncpy(novo->header, "#BLK", 4);
+	novo->nblocos = 1;
+	novo->nregistros = 0;
+	return novo;
+}
+
 int criaArquivo(){
 	FILE* arquivo = fopen("arquivo.txt", "wb");
 	if(!arquivo){
 		return 0;
 	}else{
-		bloco* bloco= criaBloco();
+		blocoinicial* bloco= criaBlocoInicial();
 		fwrite(bloco, tamBloco, 1, arquivo);
 		free(bloco);
 		fclose(arquivo);
@@ -20,17 +29,52 @@ int criaArquivo(){
 	}
 }
 
+void AtualizaHeader(FILE* arquivo, int nregistros, int nblocos){
+	blocoinicial* primeirobloco = (blocoinicial*)malloc(sizeof(blocoinicial));
+	fseek(arquivo, 0, SEEK_SET);
+	fread(primeirobloco, tamBloco, 1, arquivo);
+	primeirobloco->nblocos += nblocos;
+	primeirobloco->nregistros += nregistros;
+	fseek(arquivo, 0, SEEK_SET);
+	fwrite(primeirobloco, tamBloco, 1, arquivo);
+	free(primeirobloco);
+}
+
 int insereReg(reg newreg){
 	int blocon = 0; //para avançar entre os blocos
 	int regn = 0;
 	FILE* arquivo = fopen("arquivo.txt", "rb+");
 	bloco* temp = criaBloco(); //bloco temporario para escrevermos o registro
+	blocoinicial* tempinicial = criaBlocoInicial();
 
 	if(!arquivo){
 		printf("Arquivo nao encontrado!\n");
 		return 0;
 	}else{
 		printf("Arquivo encontrado\n");
+		fread(tempinicial, tamBloco,1,arquivo);
+		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
+			printf("Bloco validado.\n");
+				while(regn <= 6){
+					printf("Procurando registro vazio.\n");
+					if(tempinicial->index[regn].code == 0 || tempinicial->index[regn].code == -1){ // zero para vazio | -1 para registro removido
+						printf("Escrevendo dados.\n");
+						tempinicial->index[regn] = newreg;
+						fseek(arquivo, blocon*tamBloco, SEEK_SET);
+              			fwrite(tempinicial, tamBloco, 1, arquivo);
+              			AtualizaHeader(arquivo, 1, 0);
+              			free(temp);
+              			free(tempinicial);
+              			fclose(arquivo);
+						return 1;
+					}else{
+						printf("Procurando prox registro.\n");
+						regn++;
+					}
+				}
+				blocon++;
+				regn = 0;
+		}
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
 				printf("Bloco validado.\n");
@@ -41,8 +85,9 @@ int insereReg(reg newreg){
 						temp->index[regn] = newreg;
 						fseek(arquivo, blocon*tamBloco, SEEK_SET);
               			fwrite(temp, tamBloco, 1, arquivo);
-              			fclose(arquivo);
+              			AtualizaHeader(arquivo, 1, 0);
               			free(temp);
+              			free(tempinicial);
               			fclose(arquivo);
 						return 1;
 					}else{
@@ -62,7 +107,9 @@ int insereReg(reg newreg){
 		temp->index[0] = newreg;
 		fseek(arquivo, blocon*tamBloco, SEEK_SET);
         fwrite(temp, tamBloco, 1, arquivo);
+        AtualizaHeader(arquivo, 1, 1);
         free(temp);
+        free(tempinicial);
         fclose(arquivo);
 		return 1;
 	}
@@ -107,11 +154,35 @@ int removeReg(int rindex){
 	int regn = 0;
 	FILE* arquivo = fopen("arquivo.txt", "rb+");
 	bloco* temp = criaBloco(); //bloco temporario para escrevermos o registro
+	blocoinicial* tempinicial = criaBlocoInicial();
 	if(!arquivo){
 		printf("Arquivo nao encontrado!\n");
 		return 0;
 	}else{
 		printf("Arquivo encontrado\n");
+		fread(tempinicial, tamBloco,1,arquivo);
+		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
+			printf("Bloco validado.\n");
+			while(regn <= 6){
+				printf("Procurando o registro a ser removido.\n");
+				if(tempinicial->index[regn].code == rindex){
+					printf("Removendo o registro.\n");
+					tempinicial->index[regn].code = -1;
+					fseek(arquivo, blocon*tamBloco, SEEK_SET);
+              		fwrite(tempinicial, tamBloco, 1, arquivo);
+              		AtualizaHeader(arquivo, -1, 0);
+              		free(tempinicial);
+              		free(temp);
+              		fclose(arquivo);
+					return 1;
+				}else{
+					printf("Procurando prox registro.\n");
+					regn++;
+				}
+			}
+			blocon++;
+			regn = 0;
+		}
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
 				printf("Bloco validado.\n");
@@ -122,7 +193,8 @@ int removeReg(int rindex){
 						temp->index[regn].code = -1;
 						fseek(arquivo, blocon*tamBloco, SEEK_SET);
               			fwrite(temp, tamBloco, 1, arquivo);
-              			fclose(arquivo);
+              			AtualizaHeader(arquivo, -1, 0);
+              			free(tempinicial);
               			free(temp);
               			fclose(arquivo);
 						return 1;
@@ -138,6 +210,7 @@ int removeReg(int rindex){
 			}
 		}
 		printf("Registro nao encontrado.\n");
+		free(tempinicial);
 		free(temp);
         fclose(arquivo);
 		return 0;
@@ -147,6 +220,7 @@ int removeReg(int rindex){
 int procuraReg(int key){
 	FILE* arquivo = fopen("arquivo.txt", "rb+");
 	bloco* temp = criaBloco();
+	blocoinicial* tempinicial = criaBlocoInicial();
 	int blocon = 0; //para avançar entre os blocos
 	int regn = 0;
 
@@ -155,6 +229,25 @@ int procuraReg(int key){
 		return 0;
 	}else{
 		printf("Arquivo encontrado\n");
+		fread(tempinicial, tamBloco,1,arquivo);
+		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
+			printf("Bloco validado.\n");
+			while(regn <= 6){
+				printf("Procurando o registro.\n");
+				if(tempinicial->index[regn].code == key){
+					escreveReg(tempinicial->index[regn]);
+              		fclose(arquivo);
+              		free(tempinicial);
+              		free(temp);
+              		fclose(arquivo);
+					return 1;
+				}else{
+					regn++;
+				}
+			}
+			blocon++;
+			regn = 0;
+		}
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
 				printf("Bloco validado.\n");
@@ -187,6 +280,7 @@ int procuraReg(int key){
 int listaReg(){
 	FILE* arquivo = fopen("arquivo.txt", "rb+");
 	bloco* temp = criaBloco();
+	blocoinicial* tempinicial = criaBlocoInicial();
 	int blocon = 0; //para avançar entre os blocos
 	int regn = 0;
 
@@ -195,6 +289,21 @@ int listaReg(){
 		return 0;
 	}else{
 		printf("Arquivo encontrado\n");
+		fread(tempinicial, tamBloco,1,arquivo);
+		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
+			printf("Bloco validado.\n");
+			while(regn <= 6){
+				printf("Procurando o registro.\n");
+				if(tempinicial->index[regn].code <= 0 ){
+					regn++;
+				}else{
+					escreveReg(tempinicial->index[regn]);
+					regn++;
+				}
+			}
+			blocon++;
+			regn = 0;
+		}
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
 				printf("Bloco validado.\n");
@@ -214,6 +323,7 @@ int listaReg(){
 				return 0;
 			}
 		}
+		free(tempinicial);
 		free(temp);
         fclose(arquivo);
         return 1;

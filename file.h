@@ -27,11 +27,21 @@ typedef struct {
 	reg index[8];	//quantidade de registros de 62 bytes que cabem no bloco
 } bloco; 
 
+//bloco inicial 
+typedef struct {
+	char header[4];	
+	int nblocos;
+	int nregistros;
+	reg index[8];
+} blocoinicial;
+
 //operação do bloco
 bloco* criaBloco();
+blocoinicial* criaBlocoInicial();
 
 //operações do arquivo
 int criaArquivo();
+void AtualizaHeader();
 
 // operações dos registros
 int insereReg(reg);			//parametros: registro a ser inserido
