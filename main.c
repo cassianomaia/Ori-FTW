@@ -15,7 +15,8 @@ int main() {
 			       "(3) - Remover um registro.\n"
 			       "(4) - Procurar registro.\n"
 			       "(5) - Listagem de registros.\n"
-			       "(6) - Sair.\n");
+			       "(6) - Compactar arquivo.\n"
+			       "(7) - Sair.\n");
 		printf("Sua opção:");
 		scanf("%d", &index);
 		system("clear");
@@ -27,9 +28,11 @@ int main() {
 					printf("Erro na criação do arquivo.\n");
 				}
 			break;
-			case 2:
-				insereReg(teste);
-			break;
+			case 2:{
+				FILE* arquivo = fopen("arquivo.txt", "rb+");
+				insereReg(teste, arquivo);
+				fclose(arquivo);
+			break;}
 			case 3:
 				removeReg(teste.code);
 			break;
@@ -44,6 +47,9 @@ int main() {
 				listaReg();
 			break;
 			case 6:
+				compactaArquivo();
+			break;
+			case 7:
 				index = -1;
 			break;
 		}

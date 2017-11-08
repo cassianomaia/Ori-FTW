@@ -41,10 +41,10 @@ blocoinicial* criaBlocoInicial();
 
 //operações do arquivo
 int criaArquivo();
-void AtualizaHeader();
+void AtualizaHeader(FILE*, int, int);
 
 // operações dos registros
-int insereReg(reg);			//parametros: registro a ser inserido
+int insereReg(reg, FILE*);			//parametros: registro a ser inserido
 //void leReg(reg*);
 void escreveReg(reg);
 int removeReg(int);	//codigo

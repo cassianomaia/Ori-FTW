@@ -29,6 +29,19 @@ int criaArquivo(){
 	}
 }
 
+int criaTempArquivo(){
+	FILE* arquivo = fopen("temparquivo.txt", "wb");
+	if(!arquivo){
+		return 0;
+	}else{
+		blocoinicial* bloco= criaBlocoInicial();
+		fwrite(bloco, tamBloco, 1, arquivo);
+		free(bloco);
+		fclose(arquivo);
+		return 1;
+	}
+}
+
 void AtualizaHeader(FILE* arquivo, int nregistros, int nblocos){
 	blocoinicial* primeirobloco = (blocoinicial*)malloc(sizeof(blocoinicial));
 	fseek(arquivo, 0, SEEK_SET);
@@ -40,10 +53,10 @@ void AtualizaHeader(FILE* arquivo, int nregistros, int nblocos){
 	free(primeirobloco);
 }
 
-int insereReg(reg newreg){
+int insereReg(reg newreg, FILE* arquivo){
+	fseek(arquivo, 0, SEEK_SET);
 	int blocon = 0; //para avançar entre os blocos
 	int regn = 0;
-	FILE* arquivo = fopen("arquivo.txt", "rb+");
 	bloco* temp = criaBloco(); //bloco temporario para escrevermos o registro
 	blocoinicial* tempinicial = criaBlocoInicial();
 
@@ -65,7 +78,6 @@ int insereReg(reg newreg){
               			AtualizaHeader(arquivo, 1, 0);
               			free(temp);
               			free(tempinicial);
-              			fclose(arquivo);
 						return 1;
 					}else{
 						printf("Procurando prox registro.\n");
@@ -88,7 +100,6 @@ int insereReg(reg newreg){
               			AtualizaHeader(arquivo, 1, 0);
               			free(temp);
               			free(tempinicial);
-              			fclose(arquivo);
 						return 1;
 					}else{
 						printf("Procurando prox registro.\n");
@@ -110,7 +121,6 @@ int insereReg(reg newreg){
         AtualizaHeader(arquivo, 1, 1);
         free(temp);
         free(tempinicial);
-        fclose(arquivo);
 		return 1;
 	}
 }
@@ -331,6 +341,57 @@ int listaReg(){
 }
 
 void compactaArquivo(){
-	
-}
+	FILE* arquivo = fopen("arquivo.txt", "rb+");
+	criaTempArquivo();
+	FILE* temparquivo = fopen("temparquivo.txt", "rb+");
+	bloco* temp = criaBloco();
+	blocoinicial* tempinicial = criaBlocoInicial();
+	int blocon = 0;
+	int regn = 0;
 
+	if(!arquivo){
+		printf("Arquivo nao encontrado!\n");
+	}else{
+		printf("Arquivo encontrado\n");
+		fread(tempinicial, tamBloco,1,arquivo);
+		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
+			printf("Bloco validado.\n");
+			while(regn <= 6){
+				printf("Procurando o registro.\n");
+				if(tempinicial->index[regn].code <= 0 ){
+					printf("Excluido.\n");
+					regn++;
+				}else{
+					insereReg(tempinicial->index[regn], temparquivo);
+					regn++;
+				}
+			}
+			blocon++;
+			regn = 0;
+		}
+		while ((fread(temp,tamBloco,1,arquivo)) != 0){
+			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
+				printf("Bloco validado.\n");
+				while(regn <= 6){
+					printf("Procurando o registro.\n");
+					if(temp->index[regn].code <= 0 ){
+						regn++;
+					}else{
+						insereReg(temp->index[regn], temparquivo);
+						regn++;
+					}
+				}
+				blocon++;
+				regn = 0;
+			}else{
+				printf("Inconsistencia de dados detectada, o arquivo foi corrompido.\n");
+			}
+		}
+		remove("arquivo.txt");
+		rename("temp.txt","arquivo.txt");
+		free(tempinicial);
+		free(temp);
+    	fclose(arquivo);
+    	fclose(temparquivo);
+	}
+}
