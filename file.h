@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+// Definição dos tamanhos fixos do bloco, registro e blocos
 #define tamCod 4
 #define tamDesc 50
 #define tamAno 4
@@ -12,7 +14,7 @@
 #define tamHeader 4
 
 
-// struct que define registros de 62 bytes para um arquivo de catalogo de violinos // 64bytes size
+// Struct que define registros de 62 bytes para um arquivo de catalogo de violinos // 64bytes size
 typedef struct {
 	int code;
 	char desc[50];
@@ -21,13 +23,13 @@ typedef struct {
 } reg;
 
 
-// struct que define os blocos do programa, com tamanho fixo de 512 bytes
+// Struct que define os blocos do programa, com tamanho fixo de 512 bytes
 typedef struct {
-	char header[4];	//CATITO TA SOBRANDO 12 BYTES
-	reg index[8];	//quantidade de registros de 62 bytes que cabem no bloco
+	char header[4];	
+	reg index[8];	//Quantidade de registros de 62 bytes que cabem no bloco
 } bloco; 
 
-//bloco inicial 
+//Bloco inicial 
 typedef struct {
 	char header[4];	
 	int nblocos;
@@ -35,20 +37,21 @@ typedef struct {
 	reg index[8];
 } blocoinicial;
 
-//operação do bloco
+//Operações do bloco
 bloco* criaBloco();
 blocoinicial* criaBlocoInicial();
 
-//operações do arquivo
+//Operações do arquivo
 int criaArquivo();
 void AtualizaHeader(FILE*, int, int);
+void compactaArquivo();
 
-// operações dos registros
-int insereReg(reg, FILE*);			//parametros: registro a ser inserido
-//void leReg(reg*);
+
+// Operações dos registros
+int insereReg(reg, FILE*);			
 void escreveReg(reg);
-int removeReg(int);	//codigo
-int procuraReg();	//reg, key e filepath
+int removeReg(int);	
+int procuraReg();	
 int listaReg();
 
-void compactaArquivo();
+
