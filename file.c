@@ -53,6 +53,58 @@ void AtualizaHeader(FILE* arquivo, int nregistros, int nblocos){
 	free(primeirobloco);
 }
 
+
+void compactaArquivo(){
+	FILE* arquivo = fopen("arquivo.txt", "rb+");
+	criaTempArquivo();
+	FILE* temparquivo = fopen("temparquivo.txt", "rb+");
+	bloco* temp = criaBloco();
+	blocoinicial* tempinicial = criaBlocoInicial();
+	int blocon = 0;
+	int regn = 0;
+
+	if(!arquivo){
+		printf("Arquivo nao encontrado!\n");
+	}else{
+		printf("Arquivo encontrado\n");
+		fread(tempinicial, tamBloco,1,arquivo);
+		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
+			while(regn <= 6){
+				if(tempinicial->index[regn].code <= 0 ){
+					regn++;
+				}else{
+					insereReg(tempinicial->index[regn], temparquivo);
+					regn++;
+				}
+			}
+			blocon++;
+			regn = 0;
+		}
+		while ((fread(temp,tamBloco,1,arquivo)) != 0){
+			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
+				while(regn <= 6){
+					if(temp->index[regn].code <= 0 ){
+						regn++;
+					}else{
+						insereReg(temp->index[regn], temparquivo);
+						regn++;
+					}
+				}
+				blocon++;
+				regn = 0;
+			}else{
+				printf("Inconsistencia de dados detectada, o arquivo foi corrompido.\n");
+			}
+		}
+		remove("arquivo.txt");
+		rename("temparquivo.txt","arquivo.txt");
+		free(tempinicial);
+		free(temp);
+    	fclose(arquivo);
+    	fclose(temparquivo);
+	}
+}
+
 int insereReg(reg newreg, FILE* arquivo){
 	fseek(arquivo, 0, SEEK_SET);
 	int blocon = 0; //para avançar entre os blocos
@@ -64,14 +116,10 @@ int insereReg(reg newreg, FILE* arquivo){
 		printf("Arquivo nao encontrado!\n");
 		return 0;
 	}else{
-		printf("Arquivo encontrado\n");
 		fread(tempinicial, tamBloco,1,arquivo);
 		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
-			printf("Bloco validado.\n");
 				while(regn <= 6){
-					printf("Procurando registro vazio.\n");
 					if(tempinicial->index[regn].code == 0 || tempinicial->index[regn].code == -1){ // zero para vazio | -1 para registro removido
-						printf("Escrevendo dados.\n");
 						tempinicial->index[regn] = newreg;
 						fseek(arquivo, blocon*tamBloco, SEEK_SET);
               			fwrite(tempinicial, tamBloco, 1, arquivo);
@@ -80,7 +128,6 @@ int insereReg(reg newreg, FILE* arquivo){
               			free(tempinicial);
 						return 1;
 					}else{
-						printf("Procurando prox registro.\n");
 						regn++;
 					}
 				}
@@ -89,11 +136,8 @@ int insereReg(reg newreg, FILE* arquivo){
 		}
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
-				printf("Bloco validado.\n");
 				while(regn <= 6){
-					printf("Procurando registro vazio.\n");
 					if(temp->index[regn].code == 0 || temp->index[regn].code == -1){ // zero para vazio | -1 para registro removido
-						printf("Escrevendo dados.\n");
 						temp->index[regn] = newreg;
 						fseek(arquivo, blocon*tamBloco, SEEK_SET);
               			fwrite(temp, tamBloco, 1, arquivo);
@@ -102,7 +146,6 @@ int insereReg(reg newreg, FILE* arquivo){
               			free(tempinicial);
 						return 1;
 					}else{
-						printf("Procurando prox registro.\n");
 						regn++;
 					}
 				}
@@ -125,37 +168,12 @@ int insereReg(reg newreg, FILE* arquivo){
 	}
 }
 
-/*
-void leReg(reg* regout){		//lê input e coloca em um novo registro
-	int key, inAno; 			//reg->codigo, reg->ano
-	char inDesc[50]; 			//reg->desc
-	float inValor;				//reg->valor
-	
-	
-	printf("Insira o codigo do violino: \n");
-	scanf("%d", &key);
-	regout.code = key;
-	
-	printf("Insira uma breve descricao do violino: \n");
-	fgets(inDesc, sizeof(inDesc), stdin);
-	strncpy(regout.desc, inDesc, tamDesc);
-	
-	printf("Insira o ano do violino: \n");
-	scanf("%d", &inAno);
-	regout.ano = inAno;
-	
-	printf("Insira o valor do violino: \n");
-	scanf("%f", &inValor);
-	regout.valor = inValor;
-}
-*/
-
 void escreveReg(reg regout){		//escreve o conteudo de um registro, NÃO TESTEI
 	printf("\nConteudo do registro:\n"
 		   "Codigo: %d\n"
 		   "Descrição: %s\n"
 		   "Ano: %d\n"
-		   "Valor: %f\n\n", regout.code, regout.desc, regout.ano, regout.valor);
+		   "Valor: %f\n", regout.code, regout.desc, regout.ano, regout.valor);
 }
 
 
@@ -172,9 +190,7 @@ int removeReg(int rindex){
 		printf("Arquivo encontrado\n");
 		fread(tempinicial, tamBloco,1,arquivo);
 		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
-			printf("Bloco validado.\n");
 			while(regn <= 6){
-				printf("Procurando o registro a ser removido.\n");
 				if(tempinicial->index[regn].code == rindex){
 					printf("Removendo o registro.\n");
 					tempinicial->index[regn].code = -1;
@@ -186,7 +202,6 @@ int removeReg(int rindex){
               		fclose(arquivo);
 					return 1;
 				}else{
-					printf("Procurando prox registro.\n");
 					regn++;
 				}
 			}
@@ -195,9 +210,7 @@ int removeReg(int rindex){
 		}
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
-				printf("Bloco validado.\n");
 				while(regn <= 6){
-					printf("Procurando o registro a ser removido.\n");
 					if(temp->index[regn].code == rindex){
 						printf("Removendo o registro.\n");
 						temp->index[regn].code = -1;
@@ -241,9 +254,7 @@ int procuraReg(int key){
 		printf("Arquivo encontrado\n");
 		fread(tempinicial, tamBloco,1,arquivo);
 		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
-			printf("Bloco validado.\n");
 			while(regn <= 6){
-				printf("Procurando o registro.\n");
 				if(tempinicial->index[regn].code == key){
 					escreveReg(tempinicial->index[regn]);
               		fclose(arquivo);
@@ -260,9 +271,7 @@ int procuraReg(int key){
 		}
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
-				printf("Bloco validado.\n");
 				while(regn <= 6){
-					printf("Procurando o registro.\n");
 					if(temp->index[regn].code == key){
 						escreveReg(temp->index[regn]);
               			fclose(arquivo);
@@ -301,9 +310,7 @@ int listaReg(){
 		printf("Arquivo encontrado\n");
 		fread(tempinicial, tamBloco,1,arquivo);
 		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
-			printf("Bloco validado.\n");
 			while(regn <= 6){
-				printf("Procurando o registro.\n");
 				if(tempinicial->index[regn].code <= 0 ){
 					regn++;
 				}else{
@@ -316,9 +323,7 @@ int listaReg(){
 		}
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
-				printf("Bloco validado.\n");
 				while(regn <= 6){
-					printf("Procurando o registro.\n");
 					if(temp->index[regn].code <= 0 ){
 						regn++;
 					}else{
@@ -340,58 +345,46 @@ int listaReg(){
 	}
 }
 
-void compactaArquivo(){
-	FILE* arquivo = fopen("arquivo.txt", "rb+");
-	criaTempArquivo();
-	FILE* temparquivo = fopen("temparquivo.txt", "rb+");
-	bloco* temp = criaBloco();
-	blocoinicial* tempinicial = criaBlocoInicial();
-	int blocon = 0;
-	int regn = 0;
-
-	if(!arquivo){
-		printf("Arquivo nao encontrado!\n");
-	}else{
-		printf("Arquivo encontrado\n");
-		fread(tempinicial, tamBloco,1,arquivo);
-		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
-			printf("Bloco validado.\n");
-			while(regn <= 6){
-				printf("Procurando o registro.\n");
-				if(tempinicial->index[regn].code <= 0 ){
-					printf("Excluido.\n");
-					regn++;
-				}else{
-					insereReg(tempinicial->index[regn], temparquivo);
-					regn++;
-				}
-			}
-			blocon++;
-			regn = 0;
-		}
-		while ((fread(temp,tamBloco,1,arquivo)) != 0){
-			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
-				printf("Bloco validado.\n");
-				while(regn <= 6){
-					printf("Procurando o registro.\n");
-					if(temp->index[regn].code <= 0 ){
-						regn++;
-					}else{
-						insereReg(temp->index[regn], temparquivo);
-						regn++;
-					}
-				}
-				blocon++;
-				regn = 0;
-			}else{
-				printf("Inconsistencia de dados detectada, o arquivo foi corrompido.\n");
-			}
-		}
-		remove("arquivo.txt");
-		rename("temp.txt","arquivo.txt");
-		free(tempinicial);
-		free(temp);
-    	fclose(arquivo);
-    	fclose(temparquivo);
+reg registroaleatorio(){
+	reg regin;
+	regin.code = (rand()%100) + 1;
+	regin.ano = rand()%410 + 1600; // Recebe um ano acima de 1600, ano em que o primeiro violino foi datado
+	regin.valor = rand()%10000 + 320; //Recebe um valor acima de 320, que é o valor de um violino estudante
+	switch (rand()%10 + 1){
+		case 1:
+			strcpy(regin.desc, "Antonius Stradivarius Cremonenfis, Faciebat");
+		break;
+		case 2:
+			strcpy(regin.desc, "Jean Baptiste Vuillaume a Paris, Rue Croix des Pet");
+		break;
+		case 3:
+			strcpy(regin.desc, "Copy of Antonius Stradivarius, made in Czech Rep.");
+		break;
+		case 4:
+			strcpy(regin.desc, "Francesco Ruggieri detto il per Cremona");
+		break;
+		case 5:
+			strcpy(regin.desc, "G. Carlettinius fec. Centum");
+		break;
+		case 6:
+			strcpy(regin.desc, "Enrico Orselli, Liutaio, Pesaro");
+		break;
+		case 7:
+			strcpy(regin.desc, "T. J. Holder, Luthier, Paris, Model 4/4");
+		break;
+		case 8:
+			strcpy(regin.desc, "Johann Glass, Getgenmacher in Lelpzig");
+		break;
+		case 9:
+			strcpy(regin.desc, "Giovanni Leoni Filius, Parmo n 1432, 4/4");
+		break;
+		case 10:
+			strcpy(regin.desc, "Luigi Gambelimberti, fece a Seveso l'anno 1920");
+		break;
+		case 11:
+			strcpy(regin.desc, "Georges Defat, Luthier a Paris, anno 1900");
+		break;
 	}
+
+	return regin;
 }

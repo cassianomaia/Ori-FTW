@@ -1,22 +1,20 @@
 #include"file.h"
 
 int main() {
-	reg teste;
-	teste.code = 1;
-	strcpy(teste.desc,"Lorem ipsum dolor sit amet.");
-	teste.ano = 1998;
-	teste.valor = 1962;
+	srand (time(NULL));
 	int index;
 	int key;
+	char desc[50];
 		while (index != (-1)){
 		printf("\n\nSelecione sua opcao:\n"
 			       "(1) - Criar um arquivo novo.\n"
 			       "(2) - Adcionar um registro.\n"
-			       "(3) - Remover um registro.\n"
-			       "(4) - Procurar registro.\n"
-			       "(5) - Listagem de registros.\n"
-			       "(6) - Compactar arquivo.\n"
-			       "(7) - Sair.\n");
+			       "(3) - Inserção em lotes.\n"
+			       "(4) - Remover um registro.\n"
+			       "(5) - Procurar registro.\n"
+			       "(6) - Listagem de registros.\n"
+			       "(7) - Compactar arquivo.\n"
+			       "(8) - Sair.\n");
 		printf("Sua opção:");
 		scanf("%d", &index);
 		system("clear");
@@ -29,30 +27,58 @@ int main() {
 				}
 			break;
 			case 2:{
+				reg regin;
+				printf("Digite o código do registro a ser inserido:\n");
+				scanf("%d", &regin.code);
+				printf("Digite a descrição do Instrumento:");
+				gets(desc);
+				fflush(stdin);
+				strcpy(regin.desc, desc);
+				printf("Digite o ano de fabricação do instrumento:");
+				scanf("%d", &regin.ano);
+				printf("Digite o valor do instrumento:");
+				scanf("%f", &regin.valor);
 				FILE* arquivo = fopen("arquivo.txt", "rb+");
-				insereReg(teste, arquivo);
+				insereReg(regin, arquivo);
 				fclose(arquivo);
 			break;}
-			case 3:
-				removeReg(teste.code);
-			break;
+			case 3:{
+				FILE* arquivo = fopen("arquivo.txt", "rb+");
+				printf("Digite quantos registros deseja inserir:");
+				scanf("%d", &key);
+				while(key > 0){
+					insereReg(registroaleatorio(), arquivo);
+					key--;
+				}
+				fclose(arquivo);
+			break;}
 			case 4:
+				do{
+					printf("Digite a chave do registro que deseja remover:");
+					scanf("%d", &key);
+				}while(key <= 0);
+				removeReg(key);
+				key = 0;
+			break;
+			case 5:
 				do{
 					printf("Digite a chave do registro que deseja encontrar:");
 					scanf("%d", &key);
 				}while(key <= 0);
 				procuraReg(key);
-			break;
-			case 5:
-				listaReg();
+				key = 0;
 			break;
 			case 6:
-				compactaArquivo();
+				listaReg();
 			break;
 			case 7:
+				compactaArquivo();
+			break;
+			case 8:
 				index = -1;
 			break;
 		}
 	}
 	return 0;
 }
+
