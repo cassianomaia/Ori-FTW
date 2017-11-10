@@ -407,6 +407,5 @@ reg registroaleatorio(){
 			strcpy(regin.desc, "Georges Defat, Luthier a Paris, anno 1900");
 		break;
 	}
-
 	return regin;
 }
