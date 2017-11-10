@@ -1,10 +1,13 @@
 #include"file.h"
 
 int main() {
-	srand (time(NULL));
-	int index;
-	int key;
-	char desc[50];
+	//Variaveis para funcionamento do programa
+	srand (time(NULL)); //Geração de numeros randomicos para inserçãoo em lotes
+	int index;			//Indexação do menu
+	int key;			//Chave de proposito geral para as funções
+	char desc[50];		//Vetor para armazenar a descrição de um registro que será inserido
+
+		//Loop principal de execução
 		while (index != (-1)){
 		printf("\n\nSelecione sua opcao:\n"
 			       "(1) - Criar um arquivo novo.\n"
