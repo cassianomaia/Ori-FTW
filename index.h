@@ -28,3 +28,5 @@ int criaArquivo_i();
 int criaTempArquivo_i();
 void AtualizaHeader_i(FILE*, int, int);
 void compactaArquivo_i();
+
+int insereIndex(indexfield, FILE*);	

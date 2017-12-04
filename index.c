@@ -52,3 +52,125 @@ void AtualizaHeader_i(FILE* arquivo, int nindex, int nblocos){
 	free(primeirobloco);
 }
 
+void compactaArquivo(){
+	FILE* arquivo = fopen("index.txt", "rb+");
+	criaTempArquivo_i();
+	FILE* temparquivo = fopen("tempindex.txt", "rb+");
+	bloco_i* temp = criaBloco_i();
+	blocoinicial_i* tempinicial = criaBlocoInicial_i();
+	int blocon = 0;
+	int indexn = 0;
+
+	if(!arquivo){
+		printf("Arquivo nao encontrado!\n");
+	}else{
+		printf("Arquivo encontrado\n");
+		//Leitura do bloco inicial
+		fread(tempinicial, tamBloco,1,arquivo);
+		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
+			while(indexn <= 41){
+				if(tempinicial->indexfield[indexn].code <= 0 ){
+					indexn++;
+				}else{
+					//Passagem dos registros validos do bloco original para o novo arquivo
+					insereIndex(tempinicial->indexfield[indexn], temparquivo);
+					indexn++;
+				}
+			}
+			blocon++;
+			indexn = 0;
+		}
+		//Leitura dos demais blocos
+		while ((fread(temp,tamBloco,1,arquivo)) != 0){
+			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
+				while(indexn <= 6){
+					if(temp->index[indexn].code <= 0 ){
+						indexn++;
+					}else{
+						insereIndex(temp->indexfield[indexn], temparquivo);
+						indexn++;
+					}
+				}
+				blocon++;
+				indexn = 0;
+			}else{
+				printf("Inconsistencia de dados detectada, o arquivo foi corrompido.\n");
+			}
+		}
+		//Substituição do arquivo original pelo novo arquivo gerado sem fragmentações
+		remove("arquivo.txt");
+		rename("temparquivo.txt","arquivo.txt");
+		free(tempinicial);
+		free(temp);
+    	fclose(arquivo);
+    	fclose(temparquivo);
+	}
+}
+
+int insereIndex(indexfield newindex, FILE* arquivo){
+	fseek(arquivo, 0, SEEK_SET);
+	int blocon = 0; //para avançar entre os blocos
+	int indexn = 0;
+	bloco_i* temp = criaBloco_i(); //bloco temporario para escrevermos o registro
+	blocoinicial_i* tempinicial = criaBlocoInicial_i();
+
+	if(!arquivo){
+		printf("Arquivo nao encontrado!\n");
+		return 0;
+	}else{
+		//Leitura do bloco incial
+		fread(tempinicial, tamBloco,1,arquivo);
+		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
+				while(indexn <= 6){
+					//Verificação de espaço vazio
+					if(tempinicial->indexfield[indexn].code == 0 || tempinicial->indexfield[regn].code == -1){ // zero para vazio | -1 para registro removido
+						tempinicial->indexfield[indexn] = newindex;
+						fseek(arquivo, blocon*tamBloco, SEEK_SET);
+              			fwrite(tempinicial, tamBloco, 1, arquivo);
+              			AtualizaHeader_i(arquivo, 1, 0);
+              			free(temp);
+              			free(tempinicial);
+						return 1;
+					}else{
+						indexn++;
+					}
+				}
+				blocon++;
+				indexn = 0;
+		}
+		//Leitura do resto dos blocos do arquivo
+		while ((fread(temp,tamBloco,1,arquivo)) != 0){
+			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
+				while(indexn <= 6){
+					//Verificação de espaço vazio
+					if(temp->index[indexn].code == 0 || temp->index[indexn].code == -1){ // zero para vazio | -1 para registro removido
+						tempinicial->indexfield[indexn] = newindex;
+						fseek(arquivo, blocon*tamBloco, SEEK_SET);
+              			fwrite(temp, tamBloco, 1, arquivo);
+              			AtualizaHeader_i(arquivo, 1, 0);
+              			free(temp);
+              			free(tempinicial);
+						return 1;
+					}else{
+						indexn++;
+					}
+				}
+				blocon++;
+				indexn = 0;
+			}else{
+				printf("Inconsistencia de dados detectada, o arquivo foi corrompido.\n");
+				return 0;
+			}
+		}
+		//Criação de bloco extra caso não haja espaço em nenhum bloco
+		printf("Todos os blocos estão cheios.\n");
+		temp = criaBloco_i();
+		temp->indexfield[0] = newindex;
+		fseek(arquivo, blocon*tamBloco, SEEK_SET);
+        fwrite(temp, tamBloco, 1, arquivo);
+        AtualizaHeader_i(arquivo, 1, 1);
+        free(temp);
+        free(tempinicial);
+		return 1;
+	}
+}

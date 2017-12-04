@@ -114,12 +114,15 @@ void compactaArquivo(){
 
 //Função que recebe um registro e o arquivo em que o registro deve ser inserido
 int insereReg(reg newreg, FILE* arquivo){
+	FILE* arqindex = fopen("index.txt", "rb+");
 	fseek(arquivo, 0, SEEK_SET);
 	int blocon = 0; //para avançar entre os blocos
 	int regn = 0;
-	int codetemp = 0;
 	bloco* temp = criaBloco(); //bloco temporario para escrevermos o registro
 	blocoinicial* tempinicial = criaBlocoInicial();
+
+	indexfield newindex;
+	newindex->code = newreg->code;
 
 	if(!arquivo){
 		printf("Arquivo nao encontrado!\n");
@@ -131,9 +134,9 @@ int insereReg(reg newreg, FILE* arquivo){
 				while(regn <= 6){
 					//Verificação de espaço vazio
 					if(tempinicial->index[regn].code == 0 || tempinicial->index[regn].code == -1){ // zero para vazio | -1 para registro removido
-						codetemp = (blocon + 1) * 10;
-						codetemp += regn + 1;
-						newreg->code = codetemp;
+						newindex->bloco = blocon;
+						newindex->reg = regn;
+						insereIndex(newindex, arqindex);
 						tempinicial->index[regn] = newreg;
 						fseek(arquivo, blocon*tamBloco, SEEK_SET);
               			fwrite(tempinicial, tamBloco, 1, arquivo);
@@ -154,9 +157,9 @@ int insereReg(reg newreg, FILE* arquivo){
 				while(regn <= 6){
 					//Verificação de espaço vazio
 					if(temp->index[regn].code == 0 || temp->index[regn].code == -1){ // zero para vazio | -1 para registro removido
-						codetemp = (blocon + 1) * 10;
-						codetemp += regn + 1;
-						newreg->code = codetemp;
+						newindex->bloco = blocon;
+						newindex->reg = regn;
+						insereIndex(newindex, arqindex);
 						temp->index[regn] = newreg;
 						fseek(arquivo, blocon*tamBloco, SEEK_SET);
               			fwrite(temp, tamBloco, 1, arquivo);
@@ -178,9 +181,9 @@ int insereReg(reg newreg, FILE* arquivo){
 		//Criação de bloco extra caso não haja espaço em nenhum bloco
 		printf("Todos os blocos estão cheios.\n");
 		temp = criaBloco();
-		codetemp = (blocon + 1) * 10;
-		codetemp += 1;
-		newreg->code = codetemp;
+		newindex->bloco = blocon;
+		newindex->reg = regn;
+		insereIndex(newindex, arqindex);
 		temp->index[0] = newreg;
 		fseek(arquivo, blocon*tamBloco, SEEK_SET);
         fwrite(temp, tamBloco, 1, arquivo);
