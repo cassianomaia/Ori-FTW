@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
+#include <index.h>
 
 // Definição dos tamanhos fixos de conteudos, registro, blocos e header
 #define tamCod 4
@@ -43,6 +43,7 @@ blocoinicial* criaBlocoInicial();
 
 //Operações do arquivo
 int criaArquivo();
+int criaTempArquivo();
 void AtualizaHeader(FILE*, int, int);
 void compactaArquivo();
 
