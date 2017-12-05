@@ -1,12 +1,10 @@
-#include"file.h"
-
+#include "file.h"
 int main() {
 	//Variaveis para funcionamento do programa
 	srand (time(NULL)); //Geração de numeros randomicos para inserçãoo em lotes
 	int index;			//Indexação do menu
 	int key;			//Chave de proposito geral para as funções
 	char desc[50];		//Vetor para armazenar a descrição de um registro que será inserido
-
 		//Loop principal de execução
 		while (index != (-1)){
 		printf("\n\nSelecione sua opcao:\n"
@@ -28,9 +26,16 @@ int main() {
 				}else{
 					printf("Erro na criação do arquivo.\n");
 				}
+				criaArquivo_i();
+				/*if(criaArquivo_i()){
+					printf("Arquivo de indice criado.\n");
+				}else{
+					printf("Erro ao criar arquivo de indice.\n");
+				}*/
 			break;
 			case 2:{
 				reg regin;
+				indexfield control;
 				printf("Digite o código do registro a ser inserido:\n");
 				scanf("%d", &regin.code);
 				printf("Digite a descrição do Instrumento:");
@@ -42,18 +47,25 @@ int main() {
 				printf("Digite o valor do instrumento:");
 				scanf("%f", &regin.valor);
 				FILE* arquivo = fopen("arquivo.txt", "rb+");
-				insereReg(regin, arquivo);
+				control = insereReg(regin, arquivo);
 				fclose(arquivo);
+				FILE* index = fopen("index.txt", "rb+");
+				insereIndex(control, index);	
+				fclose(index);
 			break;}
 			case 3:{
 				FILE* arquivo = fopen("arquivo.txt", "rb+");
+				FILE* index = fopen("index.txt", "rb+");
+				indexfield control;
 				printf("Digite quantos registros deseja inserir:");
 				scanf("%d", &key);
 				while(key > 0){
-					insereReg(registroaleatorio(), arquivo);
+					control = insereReg(registroaleatorio(), arquivo);
+					insereIndex(control, index);
 					key--;
 				}
 				fclose(arquivo);
+				fclose(index);
 			break;}
 			case 4:
 				do{

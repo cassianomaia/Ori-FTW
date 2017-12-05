@@ -1,6 +1,11 @@
 
-#define TAM_INDEXFIELD 12
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
+#define TAM_INDEXFIELD 12
+#define tamBloco 512
 
 typedef struct {
 	int code;

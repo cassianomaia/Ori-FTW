@@ -1,3 +1,5 @@
+#include "index.h"
+
 bloco_i* criaBloco_i(){
 	bloco_i* novo = (bloco_i*)malloc(sizeof(bloco_i));
 	memset(novo,0,tamBloco);
@@ -20,7 +22,7 @@ int criaArquivo_i(){
 	if(!arquivo){
 		return 0;
 	}else{
-		blocoinicial_i* bloco= criaBlocoInicial_i(); //Criação do bloco inicial do arquivo
+		blocoinicial_i* bloco = criaBlocoInicial_i(); //Criação do bloco inicial do arquivo
 		fwrite(bloco, tamBloco, 1, arquivo);
 		free(bloco);
 		fclose(arquivo);
@@ -33,7 +35,7 @@ int criaTempArquivo_i(){
 	if(!arquivo){
 		return 0;
 	}else{
-		blocoinicial* bloco= criaBlocoInicial_i();
+		blocoinicial_i* bloco= criaBlocoInicial_i();
 		fwrite(bloco, tamBloco, 1, arquivo);
 		free(bloco);
 		fclose(arquivo);
@@ -52,7 +54,7 @@ void AtualizaHeader_i(FILE* arquivo, int nindex, int nblocos){
 	free(primeirobloco);
 }
 
-void compactaArquivo(){
+void compactaArquivo_i(){
 	FILE* arquivo = fopen("index.txt", "rb+");
 	criaTempArquivo_i();
 	FILE* temparquivo = fopen("tempindex.txt", "rb+");
@@ -84,7 +86,7 @@ void compactaArquivo(){
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
 				while(indexn <= 6){
-					if(temp->index[indexn].code <= 0 ){
+					if(temp->indexfield[indexn].code <= 0 ){
 						indexn++;
 					}else{
 						insereIndex(temp->indexfield[indexn], temparquivo);
@@ -121,9 +123,9 @@ int insereIndex(indexfield newindex, FILE* arquivo){
 		//Leitura do bloco incial
 		fread(tempinicial, tamBloco,1,arquivo);
 		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
-				while(indexn <= 6){
+				while(indexn <= 41){
 					//Verificação de espaço vazio
-					if(tempinicial->indexfield[indexn].code == 0 || tempinicial->indexfield[regn].code == -1){ // zero para vazio | -1 para registro removido
+					if(tempinicial->indexfield[indexn].code == 0 || tempinicial->indexfield[indexn].code == -1){ // zero para vazio | -1 para registro removido
 						tempinicial->indexfield[indexn] = newindex;
 						fseek(arquivo, blocon*tamBloco, SEEK_SET);
               			fwrite(tempinicial, tamBloco, 1, arquivo);
@@ -141,9 +143,9 @@ int insereIndex(indexfield newindex, FILE* arquivo){
 		//Leitura do resto dos blocos do arquivo
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
-				while(indexn <= 6){
+				while(indexn <= 41){
 					//Verificação de espaço vazio
-					if(temp->index[indexn].code == 0 || temp->index[indexn].code == -1){ // zero para vazio | -1 para registro removido
+					if(temp->indexfield[indexn].code == 0 || temp->indexfield[indexn].code == -1){ // zero para vazio | -1 para registro removido
 						tempinicial->indexfield[indexn] = newindex;
 						fseek(arquivo, blocon*tamBloco, SEEK_SET);
               			fwrite(temp, tamBloco, 1, arquivo);

@@ -27,6 +27,7 @@ int criaArquivo(){
 		fwrite(bloco, tamBloco, 1, arquivo);
 		free(bloco);
 		fclose(arquivo);
+		free(arquivo);
 		return 1;
 	}
 }
@@ -113,20 +114,21 @@ void compactaArquivo(){
 }
 
 //Função que recebe um registro e o arquivo em que o registro deve ser inserido
-int insereReg(reg newreg, FILE* arquivo){
-	FILE* arqindex = fopen("index.txt", "rb+");
+indexfield insereReg(reg newreg, FILE* arquivo){
+	//FILE* arqindex = fopen("index.txt", "rb+");
 	fseek(arquivo, 0, SEEK_SET);
 	int blocon = 0; //para avançar entre os blocos
 	int regn = 0;
 	bloco* temp = criaBloco(); //bloco temporario para escrevermos o registro
 	blocoinicial* tempinicial = criaBlocoInicial();
-
 	indexfield newindex;
-	newindex->code = newreg->code;
+
+	//indexfield newindex;
+	//newindex.code = newreg.code;
 
 	if(!arquivo){
 		printf("Arquivo nao encontrado!\n");
-		return 0;
+		return newindex;
 	}else{
 		//Leitura do bloco incial
 		fread(tempinicial, tamBloco,1,arquivo);
@@ -134,16 +136,18 @@ int insereReg(reg newreg, FILE* arquivo){
 				while(regn <= 6){
 					//Verificação de espaço vazio
 					if(tempinicial->index[regn].code == 0 || tempinicial->index[regn].code == -1){ // zero para vazio | -1 para registro removido
-						newindex->bloco = blocon;
-						newindex->reg = regn;
-						insereIndex(newindex, arqindex);
+						//newindex.bloco = blocon;
+						//newindex.reg = regn;
+						//insereIndex(newindex, arqindex);
+						newindex.bloco = blocon;
+						newindex.reg = regn;
 						tempinicial->index[regn] = newreg;
 						fseek(arquivo, blocon*tamBloco, SEEK_SET);
               			fwrite(tempinicial, tamBloco, 1, arquivo);
               			AtualizaHeader(arquivo, 1, 0);
               			free(temp);
               			free(tempinicial);
-						return 1;
+						return newindex;
 					}else{
 						regn++;
 					}
@@ -157,16 +161,18 @@ int insereReg(reg newreg, FILE* arquivo){
 				while(regn <= 6){
 					//Verificação de espaço vazio
 					if(temp->index[regn].code == 0 || temp->index[regn].code == -1){ // zero para vazio | -1 para registro removido
-						newindex->bloco = blocon;
-						newindex->reg = regn;
-						insereIndex(newindex, arqindex);
+						//newindex.bloco = blocon;
+						//newindex.reg = regn;
+						//insereIndex(newindex, arqindex);
+						newindex.bloco = blocon;
+						newindex.reg = regn;
 						temp->index[regn] = newreg;
 						fseek(arquivo, blocon*tamBloco, SEEK_SET);
               			fwrite(temp, tamBloco, 1, arquivo);
               			AtualizaHeader(arquivo, 1, 0);
               			free(temp);
               			free(tempinicial);
-						return 1;
+						return newindex;
 					}else{
 						regn++;
 					}
@@ -175,22 +181,24 @@ int insereReg(reg newreg, FILE* arquivo){
 				regn = 0;
 			}else{
 				printf("Inconsistencia de dados detectada, o arquivo foi corrompido.\n");
-				return 0;
+				return newindex;
 			}
 		}
 		//Criação de bloco extra caso não haja espaço em nenhum bloco
 		printf("Todos os blocos estão cheios.\n");
 		temp = criaBloco();
-		newindex->bloco = blocon;
-		newindex->reg = regn;
-		insereIndex(newindex, arqindex);
+		//newindex.bloco = blocon;
+		//newindex.reg = regn;
+		//insereIndex(newindex, arqindex);
+		newindex.bloco = blocon;
+		newindex.reg = 0;
 		temp->index[0] = newreg;
 		fseek(arquivo, blocon*tamBloco, SEEK_SET);
         fwrite(temp, tamBloco, 1, arquivo);
         AtualizaHeader(arquivo, 1, 1);
         free(temp);
         free(tempinicial);
-		return 1;
+		return newindex;
 	}
 }
 
@@ -421,4 +429,182 @@ reg registroaleatorio(){
 		break;
 	}
 	return regin;
+}
+
+
+bloco_i* criaBloco_i(){
+	bloco_i* new = (bloco_i*)malloc(sizeof(bloco_i));
+	memset(new,0,tamBloco);
+	strncpy(new->header, "#BLK", 4); //Todos os blocos recebem esse header, para confirmação de consistencia na criação
+	return new;
+}
+
+//Criação do bloco inicial, que tem caracteristica diferente dos demais blocos
+blocoinicial_i* criaBlocoInicial_i(){
+	blocoinicial_i* new = (blocoinicial_i*)malloc(sizeof(blocoinicial_i));
+	memset(new,0,tamBloco);
+	strncpy(new->header, "#BLK", 4); //Todos os blocos recebem esse header, para confirmação de consistencia na criação
+	new->nblocos = 1; //Como criaBlocoInicial só é chamada na criação do arquivo, temos total certeza de que teremos somente 1 bloco e 0 registros
+	new->nindex = 0;
+	return new;
+}
+
+int criaArquivo_i(){
+	FILE* arquivo_index = fopen("index.txt", "wb");
+	if(!arquivo_index){
+		return 0;
+	}else{
+		blocoinicial_i* blocoinicial = criaBlocoInicial_i(); //Criação do bloco inicial do arquivo
+		fwrite(blocoinicial, tamBloco, 1, arquivo_index);
+		free(blocoinicial);
+		fclose(arquivo_index);
+		return 1;
+	}
+}
+
+int criaTempArquivo_i(){
+	FILE* arquivo = fopen("tempindex.txt", "wb");
+	if(!arquivo){
+		return 0;
+	}else{
+		blocoinicial_i* bloco= criaBlocoInicial_i();
+		fwrite(bloco, tamBloco, 1, arquivo);
+		free(bloco);
+		fclose(arquivo);
+		return 1;
+	}
+}
+
+void AtualizaHeader_i(FILE* arquivo, int nindex, int nblocos){
+	blocoinicial_i* primeirobloco = (blocoinicial_i*)malloc(sizeof(blocoinicial_i));
+	fseek(arquivo, 0, SEEK_SET);
+	fread(primeirobloco, tamBloco, 1, arquivo);
+	primeirobloco->nblocos += nblocos;
+	primeirobloco->nindex += nindex;
+	fseek(arquivo, 0, SEEK_SET);
+	fwrite(primeirobloco, tamBloco, 1, arquivo);
+	free(primeirobloco);
+}
+
+void compactaArquivo_i(){
+	FILE* arquivo = fopen("index.txt", "rb+");
+	criaTempArquivo_i();
+	FILE* temparquivo = fopen("tempindex.txt", "rb+");
+	bloco_i* temp = criaBloco_i();
+	blocoinicial_i* tempinicial = criaBlocoInicial_i();
+	int blocon = 0;
+	int indexn = 0;
+
+	if(!arquivo){
+		printf("Arquivo nao encontrado!\n");
+	}else{
+		printf("Arquivo encontrado\n");
+		//Leitura do bloco inicial
+		fread(tempinicial, tamBloco,1,arquivo);
+		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
+			while(indexn <= 41){
+				if(tempinicial->index[indexn].code <= 0 ){
+					indexn++;
+				}else{
+					//Passagem dos registros validos do bloco original para o novo arquivo
+					insereIndex(tempinicial->index[indexn], temparquivo);
+					indexn++;
+				}
+			}
+			blocon++;
+			indexn = 0;
+		}
+		//Leitura dos demais blocos
+		while ((fread(temp,tamBloco,1,arquivo)) != 0){
+			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
+				while(indexn <= 6){
+					if(temp->index[indexn].code <= 0 ){
+						indexn++;
+					}else{
+						insereIndex(temp->index[indexn], temparquivo);
+						indexn++;
+					}
+				}
+				blocon++;
+				indexn = 0;
+			}else{
+				printf("Inconsistencia de dados detectada, o arquivo foi corrompido.\n");
+			}
+		}
+		//Substituição do arquivo original pelo novo arquivo gerado sem fragmentações
+		remove("arquivo.txt");
+		rename("temparquivo.txt","arquivo.txt");
+		free(tempinicial);
+		free(temp);
+    	fclose(arquivo);
+    	fclose(temparquivo);
+	}
+}
+
+int insereIndex(indexfield newindex, FILE* arquivo){
+	fseek(arquivo, 0, SEEK_SET);
+	int blocon = 0; //para avançar entre os blocos
+	int indexn = 0;
+	bloco_i* temp = criaBloco_i(); //bloco temporario para escrevermos o registro
+	blocoinicial_i* tempinicial = criaBlocoInicial_i();
+
+	if(!arquivo){
+		printf("Arquivo nao encontrado!\n");
+		return 0;
+	}else{
+		//Leitura do bloco incial
+		fread(tempinicial, tamBloco,1,arquivo);
+		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
+				while(indexn <= 41){
+					//Verificação de espaço vazio
+					if(tempinicial->index[indexn].code == 0 || tempinicial->index[indexn].code == -1){ // zero para vazio | -1 para registro removido
+						tempinicial->index[indexn] = newindex;
+						fseek(arquivo, blocon*tamBloco, SEEK_SET);
+              			fwrite(tempinicial, tamBloco, 1, arquivo);
+              			AtualizaHeader_i(arquivo, 1, 0);
+              			free(temp);
+              			free(tempinicial);
+						return 1;
+					}else{
+						indexn++;
+					}
+				}
+				blocon++;
+				indexn = 0;
+		}
+		//Leitura do resto dos blocos do arquivo
+		while ((fread(temp,tamBloco,1,arquivo)) != 0){
+			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
+				while(indexn <= 41){
+					//Verificação de espaço vazio
+					if(temp->index[indexn].code == 0 || temp->index[indexn].code == -1){ // zero para vazio | -1 para registro removido
+						tempinicial->index[indexn] = newindex;
+						fseek(arquivo, blocon*tamBloco, SEEK_SET);
+              			fwrite(temp, tamBloco, 1, arquivo);
+              			AtualizaHeader_i(arquivo, 1, 0);
+              			free(temp);
+              			free(tempinicial);
+						return 1;
+					}else{
+						indexn++;
+					}
+				}
+				blocon++;
+				indexn = 0;
+			}else{
+				printf("Inconsistencia de dados detectada, o arquivo foi corrompido.\n");
+				return 0;
+			}
+		}
+		//Criação de bloco extra caso não haja espaço em nenhum bloco
+		printf("Todos os blocos estão cheios.\n");
+		temp = criaBloco_i();
+		temp->index[0] = newindex;
+		fseek(arquivo, blocon*tamBloco, SEEK_SET);
+        fwrite(temp, tamBloco, 1, arquivo);
+        AtualizaHeader_i(arquivo, 1, 1);
+        free(temp);
+        free(tempinicial);
+		return 1;
+	}
 }
