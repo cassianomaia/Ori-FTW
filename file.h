@@ -36,6 +36,7 @@ typedef struct {
 	reg index[8];
 } blocoinicial;
 
+//Struct que define um index no arquivo, contem o código e as posições do registro no arquivo
 typedef struct {
 	int code;
 	int bloco;
@@ -44,14 +45,14 @@ typedef struct {
 
 typedef struct {
 	char header[4];	
-	indexfield index[42];	//Quantidade de registros de 62 bytes que cabem no bloco
+	indexfield index[22];	
 } bloco_i; 
 
 typedef struct {
 	int nblocos;
 	int nindex;
 	char header[4];	
-	indexfield index[42];
+	indexfield index[22];
 } blocoinicial_i;
 
 
@@ -89,3 +90,5 @@ void compactaArquivo_i();
 int insereIndex(indexfield, FILE*);	
 int removeIndex(int);
 int procuraIndex(int key);
+
+void read_csv();

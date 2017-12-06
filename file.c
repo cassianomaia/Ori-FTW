@@ -517,7 +517,7 @@ void compactaArquivo_i(){
 		//Leitura dos demais blocos
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
-				while(indexn <= 6){
+				while(indexn <= 41){
 					if(temp->index[indexn].code <= 0 ){
 						indexn++;
 					}else{
@@ -575,7 +575,7 @@ int insereIndex(indexfield newindex, FILE* arquivo){
 		//Leitura do resto dos blocos do arquivo
 		while ((fread(temp,tamBloco,1,arquivo)) != 0){
 			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
-				while(indexn <= 41){
+				while(indexn <= 40){
 					//Verificação de espaço vazio
 					if(temp->index[indexn].code == 0 || temp->index[indexn].code == -1){ // zero para vazio | -1 para registro removido
 						tempinicial->index[indexn] = newindex;
@@ -743,13 +743,33 @@ int procuraIndex(int key){
         	return 0;
     	}else{
     		if(search.bloco == 0){
+    			fseek(arquivo,(tamBloco*search.bloco),SEEK_SET);
     			fread(readinicial, tamBloco, 1, arquivo);
     			escreveReg(readinicial->index[search.reg]);
     		}else{
-    			fread(read, tamBloco*search.bloco, 1, arquivo);
+    			fseek(arquivo,(tamBloco*search.bloco),SEEK_SET);
+    			fread(read, tamBloco, 1, arquivo);
     			escreveReg(read->index[search.reg]);
     		}
     		return 1;
     	}
 	}
+}
+
+void read_csv() {
+	reg reg_out;
+	indexfield index_out;
+	int i;
+    FILE *inFile = fopen("MOCK_DATA.csv", "r");
+    FILE* index = fopen("index.txt", "rb+");
+    FILE* arquivo = fopen("arquivo.txt", "rb+");
+    for(i = 0; i<500; i++){
+    	fscanf(inFile, "%d,%[^,],%d,%f", &reg_out.code, &reg_out.desc, &reg_out.ano, &reg_out.valor);
+    	index_out = insereReg(reg_out, arquivo);
+    	printf("%d %d %d\n", index_out.code, index_out.bloco, index_out.reg);
+    	insereIndex(index_out, index);
+	}
+	fclose(inFile);
+	fclose(arquivo);
+	fclose(index);
 }
