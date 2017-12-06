@@ -77,6 +77,7 @@ int listaReg();
 //Operação que gera registros aleatórios para inserção em lotes
 reg registroaleatorio();
 
+//Operações de Indicex
 bloco_i* criaBloco_i();
 blocoinicial_i* criaBlocoInicial_i();
 

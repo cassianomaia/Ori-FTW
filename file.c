@@ -532,8 +532,8 @@ void compactaArquivo_i(){
 			}
 		}
 		//Substituição do arquivo original pelo novo arquivo gerado sem fragmentações
-		remove("arquivo.txt");
-		rename("temparquivo.txt","arquivo.txt");
+		remove("index.txt");
+		rename("tempindex.txt","index.txt");
 		free(tempinicial);
 		free(temp);
     	fclose(arquivo);
@@ -703,6 +703,7 @@ int procuraIndex(int key){
 				if(tempinicial->index[indexn].code == key){
 					search = tempinicial->index[indexn];
 					indexn = 999;
+					printf("%d %d %d \n", search.code, search.bloco, search.reg);
 				}else{
 					indexn++;
 				}
@@ -718,7 +719,7 @@ int procuraIndex(int key){
 						//Verificação do codigo do registro
 						if(temp->index[indexn].code == key){
 							search = temp->index[indexn];
-							index = 999;
+							indexn = 999;
 						}else{
 							indexn++;
 						}

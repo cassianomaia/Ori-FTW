@@ -27,12 +27,11 @@ int main() {
 				}else{
 					printf("Erro na criação do arquivo.\n");
 				}
-				criaArquivo_i();
-				/*if(criaArquivo_i()){
+				if(criaArquivo_i()){
 					printf("Arquivo de indice criado.\n");
 				}else{
 					printf("Erro ao criar arquivo de indice.\n");
-				}*/
+				}
 			break;
 			case 2:{
 				reg regin;
@@ -49,6 +48,7 @@ int main() {
 				scanf("%f", &regin.valor);
 				FILE* arquivo = fopen("arquivo.txt", "rb+");
 				control = insereReg(regin, arquivo);
+				printf("%d %d %d \n", control.code, control.bloco, control.reg);
 				fclose(arquivo);
 				FILE* index = fopen("index.txt", "rb+");
 				insereIndex(control, index);	
@@ -98,6 +98,7 @@ int main() {
 			break;
 			case 8:
 				compactaArquivo();
+				compactaArquivo_i();
 			break;
 			case 9:
 				index = -1;
@@ -106,4 +107,3 @@ int main() {
 	}
 	return 0;
 }
-
