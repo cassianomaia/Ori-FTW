@@ -13,9 +13,10 @@ int main() {
 			       "(3) - Inserção em lotes.\n"
 			       "(4) - Remover um registro.\n"
 			       "(5) - Procurar registro.\n"
-			       "(6) - Listagem de registros.\n"
-			       "(7) - Compactar arquivo.\n"
-			       "(8) - Sair.\n");
+			       "(6) - Procurar pelo indice.\n"
+			       "(7) - Listagem de registros.\n"
+			       "(8) - Compactar arquivo.\n"
+			       "(9) - Sair.\n");
 		printf("Sua opção:");
 		scanf("%d", &index);
 		system("clear");
@@ -73,6 +74,7 @@ int main() {
 					scanf("%d", &key);
 				}while(key <= 0);
 				removeReg(key);
+				removeIndex(key);
 				key = 0;
 			break;
 			case 5:
@@ -84,12 +86,20 @@ int main() {
 				key = 0;
 			break;
 			case 6:
-				listaReg();
+				do{
+					printf("Digite a chave do registro que deseja encontrar:");
+					scanf("%d", &key);
+				}while(key <= 0);
+				procuraIndex(key);
+				key = 0;
 			break;
 			case 7:
-				compactaArquivo();
+				listaReg();
 			break;
 			case 8:
+				compactaArquivo();
+			break;
+			case 9:
 				index = -1;
 			break;
 		}

@@ -86,3 +86,5 @@ void AtualizaHeader_i(FILE*, int, int);
 void compactaArquivo_i();
 
 int insereIndex(indexfield, FILE*);	
+int removeIndex(int);
+int procuraIndex(int key);

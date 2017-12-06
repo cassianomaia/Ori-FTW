@@ -124,7 +124,7 @@ indexfield insereReg(reg newreg, FILE* arquivo){
 	indexfield newindex;
 
 	//indexfield newindex;
-	//newindex.code = newreg.code;
+	newindex.code = newreg.code;
 
 	if(!arquivo){
 		printf("Arquivo nao encontrado!\n");
@@ -606,5 +606,149 @@ int insereIndex(indexfield newindex, FILE* arquivo){
         free(temp);
         free(tempinicial);
 		return 1;
+	}
+}
+
+int removeIndex(int rindex){
+	int blocon = 0; //para avançar entre os blocos
+	int indexn = 0;
+	FILE* arquivo = fopen("index.txt", "rb+");
+	bloco_i* temp = criaBloco_i(); //bloco temporario para escrevermos o registro
+	blocoinicial_i* tempinicial = criaBlocoInicial_i();
+	if(!arquivo){
+		printf("Arquivo nao encontrado!\n");
+		return 0;
+	}else{
+		printf("Arquivo encontrado\n");
+		//Leitura do bloco inicial
+		fread(tempinicial, tamBloco,1,arquivo);
+		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
+			while(indexn <= 40){
+				//Checagem da chave
+				if(tempinicial->index[indexn].code == rindex){
+					printf("Removendo o registro.\n");
+					tempinicial->index[indexn].code = -1;
+					fseek(arquivo, blocon*tamBloco, SEEK_SET);
+              		fwrite(tempinicial, tamBloco, 1, arquivo);
+              		AtualizaHeader(arquivo, -1, 0);
+              		free(tempinicial);
+              		free(temp);
+              		fclose(arquivo);
+					return 1;
+				}else{
+					indexn++;
+				}
+			}
+			blocon++;
+			indexn = 0;
+		}
+		//Leitura dos demais blocos
+		while ((fread(temp,tamBloco,1,arquivo)) != 0){
+			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
+				while(indexn <= 41){
+					//Verificação do codigo do registro
+					if(temp->index[indexn].code == rindex){
+						printf("Removendo o registro.\n");
+						temp->index[indexn].code = -1;
+						fseek(arquivo, blocon*tamBloco, SEEK_SET);
+              			fwrite(temp, tamBloco, 1, arquivo);
+              			AtualizaHeader(arquivo, -1, 0);
+              			free(tempinicial);
+              			free(temp);
+              			fclose(arquivo);
+						return 1;
+					}else{
+						indexn++;
+					}
+				}
+				blocon++;
+				indexn = 0;
+			}else{
+				printf("Inconsistencia de dados detectada, o arquivo foi corrompido.\n");
+				return 0;
+			}
+		}
+		printf("Registro nao encontrado.\n");
+		free(tempinicial);
+		free(temp);
+        fclose(arquivo);
+		return 0;
+	}
+}
+
+int procuraIndex(int key){
+	FILE* index = fopen("index.txt", "rb+");
+	FILE* arquivo = fopen("arquivo.txt", "rb+");
+	bloco_i* temp = criaBloco_i(); //bloco temporario para escrevermos o registro
+	blocoinicial_i* tempinicial = criaBlocoInicial_i();
+	bloco* read = criaBloco();
+	blocoinicial* readinicial = criaBlocoInicial();
+	indexfield search;
+	search.code = 0;
+	search.bloco = 0;
+	search.reg = 0;
+	int blocon = 0;
+	int indexn = 0;
+
+	if(!index){
+		printf("Arquivo nao encontrado!\n");
+		return 0;
+	}else{
+		printf("Arquivo encontrado\n");
+		//Leitura do bloco inicial
+		fread(tempinicial, tamBloco,1,index);
+		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
+			while(indexn <= 40){
+				//Checagem da chave
+				if(tempinicial->index[indexn].code == key){
+					search = tempinicial->index[indexn];
+					indexn = 999;
+				}else{
+					indexn++;
+				}
+			}
+			blocon++;
+			indexn = 0;
+		}
+		//Leitura dos demais blocos
+		if(search.code == 0){
+			while ((fread(temp,tamBloco,1,index)) != 0){
+				if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
+					while(indexn <= 41){
+						//Verificação do codigo do registro
+						if(temp->index[indexn].code == key){
+							search = temp->index[indexn];
+							index = 999;
+						}else{
+							indexn++;
+						}
+					}
+					blocon++;
+					indexn = 0;
+				}else{
+					printf("Inconsistencia de dados detectada, o arquivo foi corrompido.\n");
+					return 0;
+				}
+			}
+		}
+		if(search.code == 0){
+			printf("Registro nao encontrado.\n");
+			free(tempinicial);
+			free(temp);
+        	free(readinicial);
+        	free(read);
+        	fclose(arquivo);
+        	fclose(index);
+        	return 0;
+    	}else{
+    		if(search.bloco == 0){
+    			fread(readinicial, tamBloco, 1, arquivo);
+    			escreveReg(readinicial->index[search.reg]);
+    		}else{
+    			fread(read, tamBloco*search.bloco, 1, arquivo);
+    			escreveReg(read->index[search.reg]);
+    		}
+    		return 1;
+    	}
 	}
 }
