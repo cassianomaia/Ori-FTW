@@ -45,14 +45,14 @@ typedef struct {
 
 typedef struct {
 	char header[4];	
-	indexfield index[22];	
+	indexfield index[42];	
 } bloco_i; 
 
 typedef struct {
 	int nblocos;
 	int nindex;
 	char header[4];	
-	indexfield index[22];
+	indexfield index[42];
 } blocoinicial_i;
 
 
