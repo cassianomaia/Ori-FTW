@@ -66,6 +66,10 @@ void compactaArquivo(){
 	blocoinicial* tempinicial = criaBlocoInicial();
 	int blocon = 0;
 	int regn = 0;
+	indexcontrol index_out;
+	criaTempArquivo_i();
+	FILE* temp_index = fopen("tempindex.txt", "rb+");
+	FILE* index = fopen("index.txt", "rb+");
 
 	if(!arquivo){
 		printf("Arquivo nao encontrado!\n");
@@ -79,7 +83,8 @@ void compactaArquivo(){
 					regn++;
 				}else{
 					//Passagem dos registros validos do bloco original para o novo arquivo
-					insereReg(tempinicial->index[regn], temparquivo);
+					index_out = insereReg(tempinicial->index[regn], temparquivo);
+					insereIndex(index_out, temp_index);
 					regn++;
 				}
 			}
@@ -94,6 +99,7 @@ void compactaArquivo(){
 						regn++;
 					}else{
 						insereReg(temp->index[regn], temparquivo);
+						insereIndex(index_out, temp_index);
 						regn++;
 					}
 				}
@@ -106,10 +112,14 @@ void compactaArquivo(){
 		//Substituição do arquivo original pelo novo arquivo gerado sem fragmentações
 		remove("arquivo.txt");
 		rename("temparquivo.txt","arquivo.txt");
+		remove("index.txt");
+		rename("tempindex.txt","index.txt");
 		free(tempinicial);
 		free(temp);
     	fclose(arquivo);
     	fclose(temparquivo);
+    	fclose(temp_index);
+    	fclose(index);
 	}
 }
 
@@ -484,61 +494,6 @@ void AtualizaHeader_i(FILE* arquivo, int nindex, int nblocos){
 	fseek(arquivo, 0, SEEK_SET);
 	fwrite(primeirobloco, tamBloco, 1, arquivo);
 	free(primeirobloco);
-}
-
-void compactaArquivo_i(){
-	FILE* arquivo = fopen("index.txt", "rb+");
-	criaTempArquivo_i();
-	FILE* temparquivo = fopen("tempindex.txt", "rb+");
-	bloco_i* temp = criaBloco_i();
-	blocoinicial_i* tempinicial = criaBlocoInicial_i();
-	int blocon = 0;
-	int indexn = 0;
-
-	if(!arquivo){
-		printf("Arquivo nao encontrado!\n");
-	}else{
-		printf("Arquivo encontrado\n");
-		//Leitura do bloco inicial
-		fread(tempinicial, tamBloco,1,arquivo);
-		if((tempinicial->header[0]=='#')&&(tempinicial->header[1]=='B')&&(tempinicial->header[2]=='L')&&(tempinicial->header[3]=='K')){
-			while(indexn <= 41){
-				if(tempinicial->index[indexn].code <= 0 ){
-					indexn++;
-				}else{
-					//Passagem dos registros validos do bloco original para o novo arquivo
-					insereIndex(tempinicial->index[indexn], temparquivo);
-					indexn++;
-				}
-			}
-			blocon++;
-			indexn = 0;
-		}
-		//Leitura dos demais blocos
-		while ((fread(temp,tamBloco,1,arquivo)) != 0){
-			if((temp->header[0]=='#')&&(temp->header[1]=='B')&&(temp->header[2]=='L')&&(temp->header[3]=='K')){
-				while(indexn <= 41){
-					if(temp->index[indexn].code <= 0 ){
-						indexn++;
-					}else{
-						insereIndex(temp->index[indexn], temparquivo);
-						indexn++;
-					}
-				}
-				blocon++;
-				indexn = 0;
-			}else{
-				printf("Inconsistencia de dados detectada, o arquivo foi corrompido.\n");
-			}
-		}
-		//Substituição do arquivo original pelo novo arquivo gerado sem fragmentações
-		remove("index.txt");
-		rename("tempindex.txt","index.txt");
-		free(tempinicial);
-		free(temp);
-    	fclose(arquivo);
-    	fclose(temparquivo);
-	}
 }
 
 int insereIndex(indexfield newindex, FILE* arquivo){
